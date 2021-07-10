@@ -1,9 +1,7 @@
 ---
 - name: fail2ban telepítése
   ansible.builtin.apt:
-    name:
-      - fail2ban
-      - python3-dnspython
+    name: fail2ban
     state: present
 - name: fail2ban konfigurálása
   ansible.builtin.blockinfile:
