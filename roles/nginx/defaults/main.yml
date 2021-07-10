@@ -1,0 +1,2 @@
+nginx_bind_ipv4: "*"
+nginx_bind_ipv6: "::"

@@ -1,0 +1,4 @@
+- name: Install Vundle plugins
+  become: yes
+  become_user: belidzs
+  ansible.builtin.command: vim +PluginInstall +qall

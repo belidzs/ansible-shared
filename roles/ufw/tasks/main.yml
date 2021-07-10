@@ -1,0 +1,14 @@
+- name: ufw telepítése
+  ansible.builtin.apt:
+    name: ufw
+    state: present
+- name: SSH engedélyezése
+  community.general.ufw:
+    name: OpenSSH
+    rule: allow
+- name: Tűzfal engedélyezése
+  community.general.ufw:
+    state: enabled
+    policy: reject
+    direction: incoming
+  when: not ufw_disabled|bool

@@ -1,0 +1,10 @@
+---
+- name: acme.sh telepítő futtatása
+  ansible.builtin.script: acme.sh creates=/root/.acme.sh/
+- name: "Tanúsítvány letöltése: {{ acmesh_dns_zone }}"
+  environment: 
+    CF_Email: "{{ acmesh_cloudflare_account_email }}"
+    CF_Key: "{{ acmesh_cloudflare_account_api_token }}"
+  ansible.builtin.shell: /root/.acme.sh/acme.sh --issue --dns dns_cf --dnssleep 15 -d {{ acmesh_dns_zone }} -d *.{{ acmesh_dns_zone }} {{ acmesh_renew_hook }} {{ acmesh_extra_parameters }}
+  args:
+    creates: /root/.acme.sh/{{ acmesh_dns_zone }}/{{ acmesh_dns_zone }}.cer

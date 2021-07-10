@@ -1,0 +1,12 @@
+- name: regenerate /etc/postfix/virtual
+  ansible.builtin.shell: postmap /etc/postfix/virtual
+  notify:
+    - restart postfix
+- name: regenerate /etc/postfix/sasl/sasl_passwd
+  ansible.builtin.shell: postmap /etc/postfix/sasl/sasl_passwd
+  notify:
+    - restart postfix
+- name: restart postfix
+  ansible.builtin.service:
+    name: postfix
+    state: restarted

@@ -1,0 +1,8 @@
+common_shell_users:
+  - username: belidzs
+    home_directory: /home/belidzs
+  - username: root
+    home_directory: /root
+common_bash_configs:
+  - eval `dircolors /opt/dircolors-solarized/dircolors.ansi-dark`
+  - eval "$(starship init bash)"

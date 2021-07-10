@@ -1,0 +1,3 @@
+dependencies:
+- role: belidzs.shared.ufw
+- role: belidzs.shared.fail2ban

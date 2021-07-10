@@ -1,0 +1,1 @@
+nginx_site_configuration_source_filename: "{{ nginx_site_configuration_filename }}"

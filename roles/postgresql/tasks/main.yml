@@ -1,0 +1,57 @@
+---
+- name: postgresql PPA aláírókulcs hozzáadása (Ubuntu)
+  ansible.builtin.apt_key:
+    url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    state: present
+  when: ansible_facts["distribution"] == "Ubuntu"
+- name: postgresql PPA repo hozzáadása (Ubuntu)
+  ansible.builtin.apt_repository:
+    repo: "deb http://apt.postgresql.org/pub/repos/apt/ {{ ansible_facts['distribution_release'] }}-pgdg main"
+    state: present
+    update_cache: yes
+  when: ansible_facts["distribution"] == "Ubuntu"
+- name: postgresql telepítése
+  ansible.builtin.apt:
+    name:
+      - "postgresql-{{ postgresql_version }}"
+      - "postgresql-server-dev-all"
+    state: present
+- name: pip telepítése (ansible részére)
+  ansible.builtin.apt:
+    name: python3-pip
+    state: present
+- name: psycopg2 telepítése pip-pel (ansible részére)
+  ansible.builtin.pip:
+    name: psycopg2-binary
+- name: postgresql.conf beállítása
+  ansible.builtin.lineinfile:
+    path: "/etc/postgresql/{{ postgresql_version }}/main/postgresql.conf"
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  loop: "{{ postgresql_lineinfiles }}"
+  notify:
+    - restart postgresql
+- name: ufw konfigurálása
+  community.general.ufw:
+    rule: allow
+    port: "5432"
+    proto: tcp
+    src: "{{ postgresql_ufw_allow_network }}"
+- meta: flush_handlers
+- name: datadog user létrehozása
+  become: yes
+  become_user: postgres
+  community.postgresql.postgresql_user:
+    name: datadog
+    password: "{{ postgresql_datadog_db_password }}"
+- name: datadog jogosultság megadása
+  become: yes
+  become_user: postgres
+  community.postgresql.postgresql_privs:
+    db: postgres
+    privs: SELECT
+    type: table
+    schema: pg_catalog
+    objs: pg_stat_database
+    roles: datadog
+    state: present

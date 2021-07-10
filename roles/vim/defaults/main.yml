@@ -1,0 +1,10 @@
+vim_plugins:
+  - altercation/vim-colors-solarized
+  - vim-airline/vim-airline
+  - vim-airline/vim-airline-themes
+  - preservim/nerdtree
+  - ryanoasis/vim-devicons
+  - Xuyuanp/nerdtree-git-plugin
+  - Glench/Vim-Jinja2-Syntax
+  - nathangrigg/vim-beancount
+

@@ -1,0 +1,4 @@
+---
+rsa_users:
+  - { username: root, home_directory: /root }
+  - { username: belidzs, home_directory: /home/belidzs }

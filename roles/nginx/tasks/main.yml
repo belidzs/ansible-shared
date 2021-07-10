@@ -1,0 +1,82 @@
+---
+- name: nginx ppa hozzáadása
+  ansible.builtin.apt_repository:
+    repo: ppa:nginx/stable
+    state: present
+    update_cache: yes
+  # focalhoz nincs PPA, a hivatalos repo pedig debian koncepciókat követ ubuntu helyett
+  when: ansible_distribution == "Ubuntu" and ansible_distribution_release == "xenial"
+- name: php ppa hozzáadása
+  ansible.builtin.apt_repository:
+    repo: ppa:ondrej/php
+    state: present
+    update_cache: yes
+  when: ansible_distribution == "Ubuntu"
+- name: nginx telepítése
+  ansible.builtin.apt: 
+    name:
+      - nginx
+      - ssl-cert
+    state: present
+- name: php telepítése (Ubuntu)
+  ansible.builtin.apt:
+    name: php7.3-fpm
+    state: present
+  when: ansible_distribution == "Ubuntu"
+- name: php telepítése (Debian)
+  ansible.builtin.apt:
+    name: php-fpm
+    state: present
+  when: 
+    - ansible_distribution == "Debian"
+    - ansible_distribution_version|int >= 10
+- name: DH paraméterek másolása
+  ansible.builtin.copy: 
+    src: dhparam.pem
+    dest: /etc/nginx/dhparam.pem
+  notify:
+    - reload nginx  
+- name: default konfiguráció törlése
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify:
+    - reload nginx
+- name: default-hardened és nginx_status konfiguráció másolása
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "/etc/nginx/sites-available/{{ item }}"
+  loop:
+    - default-hardened.conf
+    - nginx_status.conf
+  notify: 
+    - reload nginx
+- name: nginx_status konfiguráció engedélyezése
+  ansible.builtin.file:
+    src: "/etc/nginx/sites-available/{{ item }}"
+    dest: "/etc/nginx/sites-enabled/{{ item }}"
+    state: link
+  loop:
+    - default-hardened.conf
+    - nginx_status.conf    
+  notify:
+    - reload nginx
+- name: nginx.conf másolása
+  ansible.builtin.template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+  notify:
+    - reload nginx
+- name: systemd szolgáltatás engedélyezése és indítása
+  ansible.builtin.systemd:
+    name: nginx
+    state: started
+    enabled: yes
+- name: Tűzfal konfigurálása (ufw)
+  community.general.ufw:
+    name: "Nginx Full"
+    rule: allow
+- name: /var/www/html/index.html ürítése
+  ansible.builtin.copy:
+    content: ""
+    dest: /var/www/html/index.html   

@@ -1,0 +1,9 @@
+postfix_default_mailgun_username: postmaster@belidzs.hu
+postfix_default_mailgun_password: "{{ vault_postfix_default_mailgun_password }}"
+postfix_forwards:
+  to: b@belidzs.hu
+  from:
+    - root
+    - www-data
+    - belidzs
+postfix_extra_domains: {}

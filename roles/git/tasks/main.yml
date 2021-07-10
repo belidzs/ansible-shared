@@ -1,0 +1,22 @@
+---
+- name: git telepítése
+  ansible.builtin.apt:
+    name: git
+    state: present
+- # a subelements leválogatja a 'configs' listát, és berakja az item.1 változóba
+  name: git kliens konfigurálása
+  become_user: "{{ item.0.username }}"
+  become: yes
+  community.general.git_config: 
+    name: "{{ item.1.name }}"
+    value: "{{ item.1.value }}"
+    scope: global
+  loop: "{{ git_users|subelements('configs') }}"
+- # minden user megkapja mindegyik known_hosts elemet
+  name: DVCS szolgáltatók fingerprintjeinek hozzáadása known_hosts-hoz
+  become_user: "{{ item.0.username }}"
+  become: yes
+  ansible.builtin.known_hosts: 
+    name: "{{ item.1.name }}"
+    key: "{{ item.1.key }}"
+  loop: "{{ git_users|product(git_known_hosts)|list }}"

@@ -1,0 +1,13 @@
+- name: "{{ nginx_site_configuration_filename }} másolása"
+  ansible.builtin.template:
+    src: "nginx/{{ nginx_site_configuration_source_filename }}.j2"
+    dest: "/etc/nginx/sites-available/{{ nginx_site_configuration_filename }}"
+  notify:
+    - reload nginx
+- name: "{{ nginx_site_configuration_filename }} engedélyezése"
+  ansible.builtin.file:
+    src: "/etc/nginx/sites-available/{{ nginx_site_configuration_filename }}"
+    path: "/etc/nginx/sites-enabled/{{ nginx_site_configuration_filename }}"
+    state: link
+  notify:
+    - reload nginx

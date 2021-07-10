@@ -1,0 +1,5 @@
+---
+acmesh_extra_parameters: ""
+acmesh_renew_hook: "--renew-hook '/usr/sbin/service nginx restart'"
+acmesh_cloudflare_account_email: b@belidzs.hu
+acmesh_cloudflare_account_api_token: "{{ vault_acmesh_cloudflare_account_api_token }}"

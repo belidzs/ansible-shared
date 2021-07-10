@@ -1,0 +1,22 @@
+git_users:
+  - username: belidzs
+    configs:
+      - name: "user.name"
+        value: "Balázs Keresztury"
+      - name: "user.email"
+        value: "b@belidzs.hu"
+      - name: "push.default"
+        value: "simple"
+  - username: root
+    configs:
+      - name: "user.name"
+        value: "Ansible"
+      - name: "user.email"
+        value: "b@belidzs.hu"
+      - name: "push.default"
+        value: "simple"
+git_known_hosts:
+  - name: "github.com"
+    key: "|1|XPMRTrUxTDJwyCKkqCkSOfr0BW8=|/JJbnlQSuj+k0eF6vUBeYqHINXs= ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ=="
+  - name: "gitea.belidzs.hu"
+    key: "|1|73a/q89h94RwA0uCzIdeIdnyDA8=|udQe71XisEH8l7ZxAMKp5lc8e9o= ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBBXcRwQA6Rsi6cbKOv68TGwBKeYnDrhuPqHAIWBYizmkG4ohgYhhwxKkI2mkT10MSUbeW7YVDlw33V0oVVNCKkc="

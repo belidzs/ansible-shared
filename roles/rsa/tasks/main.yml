@@ -1,0 +1,24 @@
+# kimenő autentikáció DVCS szolgáltatókhoz
+# ugyanazt a kulcspárt kapja minden user
+- name: .ssh könyvtár létrehozása
+  ansible.builtin.file:
+    path: "{{ item.home_directory }}/.ssh"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    state: directory
+  with_items: "{{ rsa_users }}"
+- name: ansible ssh nyilvános kulcs másolása
+  ansible.builtin.copy:
+    src: id_rsa.pub
+    dest: "{{ item.home_directory }}/.ssh/id_rsa.pub"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+  with_items: "{{ rsa_users }}"
+- name: ansible ssh privát kulcs másolása
+  ansible.builtin.copy:
+    src: id_rsa
+    dest: "{{ item.home_directory }}/.ssh/id_rsa"
+    mode: "0600"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+  with_items: "{{ rsa_users }}"

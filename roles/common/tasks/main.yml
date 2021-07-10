@@ -1,0 +1,122 @@
+---
+# acl csomaggal megkerülhető a become_user probléma, ha az adott user amúgy nem sudoer
+# https://docs.ansible.com/ansible/latest/user_guide/become.html#becoming-an-unprivileged-user
+- name: admin utils telepítése
+  ansible.builtin.apt: 
+    name: 
+      - man-db
+      - screen
+      - mc
+      - multitail
+      - htop
+      - iotop
+      - aptitude
+      - software-properties-common
+      - dos2unix
+      - acl
+      - inetutils-ping
+      - at
+      # enélkül nincsenek időzónák
+      - tzdata
+    state: present
+- name: starship telepítése
+  ansible.builtin.shell:
+    cmd: curl -fsSL https://starship.rs/install.sh | bash -s -- -y
+    creates: /usr/local/bin/starship
+- name: ansible és belidzs csoport létrehozása
+  ansible.builtin.group: 
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - ansible
+    - belidzs
+- name: sudo jelszó tiltása
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers.d/ansible
+    line: "%ansible ALL=(ALL) NOPASSWD:ALL"
+    state: present
+    create: yes
+    validate: 'visudo -cf %s'
+- name: Felhasználók létrehozása
+  ansible.builtin.user: 
+    name: belidzs
+    groups: [ "belidzs", "ansible" ]
+    append: yes
+- name: Magyar locale generálása
+  community.general.locale_gen:
+    name: hu_HU.UTF-8
+    state: present
+- name: Magyar locale legyen a default (/etc/default/locale)
+  ansible.builtin.lineinfile:
+    path: /etc/default/locale
+    line: LANG=hu_HU.UTF-8
+    regexp: ^LANG=
+  register: locale
+- name: Magyar locale legyen a default (localectl)
+  ansible.builtin.command: localectl set-locale LANG=hu_HU.UTF-8
+  when: locale.changed
+- name: Időzóna beállítása
+  timezone: 
+    name: Europe/Budapest
+- name: SSH jelszavas belépés és root login letiltása 
+  ansible.builtin.lineinfile:
+    dest: /etc/ssh/sshd_config
+    line: "{{ item.line }}"
+    regexp: "{{ item.regexp }}"
+  with_items:
+    - { line: "PasswordAuthentication no", regexp: "^PasswordAuthentication " }
+    - { line: "PermitRootLogin no", regexp: "^PermitRootLogin " }
+  notify:
+    - restart sshd
+- name: hostname beállítása
+  ansible.builtin.hostname:
+    name: "{{ ansible_host }}"
+- name: /etc/hosts kiegészítése reverse DNS-sel
+  ansible.builtin.lineinfile:
+    dest: /etc/hosts
+    line: "127.0.1.1\t{{ ansible_host }} {{ ansible_hostname }}"
+    regexp: "^127\\.0\\.1\\.1.*"
+- name: /opt létrehozása
+  ansible.builtin.file:
+    path: /opt
+    state: directory
+# Shell konfigurálása
+- name: SSH kulcsok hozzáadása authorized_keys-hez
+  ansible.posix.authorized_key: 
+    user: belidzs
+    key: "{{ item }}"
+  loop:
+    - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICTm7mdhAiIYvQX6xBi1bzZQQhPPD7CP6RQI9zYPGNMW belidzs-20200122-ed25519
+    - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGUFJigWh1IQnz4pUOl0WriJ5p85oiinQoNC0B1kQvhs cardno:000612022516
+- name: shell kiválasztása
+  ansible.builtin.user:
+    name: "{{ item.username }}"
+    shell: /bin/bash
+  loop: "{{ common_shell_users }}"
+- name: /opt/dircolors-solarized létrehozása
+  ansible.builtin.file:
+    path: /opt/dircolors-solarized
+    state: directory
+- name: dircolors-solarized letöltése
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/seebi/dircolors-solarized/master/dircolors.ansi-dark
+    dest: /opt/dircolors-solarized/dircolors.ansi-dark
+- name: bash konfigurálása
+  ansible.builtin.lineinfile:
+    path: "{{ item[0].home_directory }}/.bashrc"
+    line: "{{ item[1] }}"
+    owner: "{{ item[0].username }}"
+    group: "{{ item[0].username }}"
+    create: yes
+  loop: "{{ common_shell_users |product(common_bash_configs) |list }}"
+- name: starship konfigurálása
+  ansible.builtin.blockinfile:
+    path: "{{ item.home_directory }}/.config/starship.toml"
+    block: |
+      [line_break]
+      disabled = true 
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    create: yes
+  loop: "{{ common_shell_users }}"
+  

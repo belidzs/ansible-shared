@@ -1,0 +1,15 @@
+- name: Vundle telepítése
+  become: yes
+  become_user: belidzs
+  ansible.builtin.git:
+    repo: https://github.com/VundleVim/Vundle.vim.git
+    dest: /home/belidzs/.vim/bundle/Vundle.vim
+- name: vim konfigurálása
+  ansible.builtin.template:
+    src: .vimrc.j2
+    dest: /home/belidzs/.vimrc
+    owner: belidzs
+    group: belidzs
+  notify:
+    - Install Vundle plugins
+

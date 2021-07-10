@@ -1,0 +1,23 @@
+server {
+    listen {{ nginx_bind_ipv4 }}:80 default_server;
+    listen [{{ nginx_bind_ipv6 }}]:80 default_server;
+    listen {{ nginx_bind_ipv4 }}:443 ssl default_server;
+    listen [{{ nginx_bind_ipv6 }}]:443 ssl default_server;
+
+    include snippets/snakeoil.conf;
+
+    root /var/www/html;
+
+    index index.html index.htm index.nginx-debian.html;
+
+    server_name _;
+
+    location / {
+        # letiltjuk a gyökérkönyvtár tartalmának megjelenítését
+        return 444;
+    }
+
+    location ~ /.+/ { 
+        # minden engedélyezett, ami alkönyvtárban van
+    }
+}

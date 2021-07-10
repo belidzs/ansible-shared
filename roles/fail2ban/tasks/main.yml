@@ -1,0 +1,17 @@
+---
+- name: fail2ban telepítése
+  ansible.builtin.apt:
+    name: fail2ban
+    state: present
+- name: fail2ban konfigurálása
+  ansible.builtin.blockinfile:
+  args:
+    path: /etc/fail2ban/jail.local
+    create: yes
+    marker: "# {mark} common"
+    block: |
+      [DEFAULT]
+      ignoreip = 127.0.0.1/8 {{ lookup('dig', 'home.belidzs.hu') }}
+      action = %(action_)s
+  notify:
+    - restart fail2ban

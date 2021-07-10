@@ -1,0 +1,28 @@
+# Ubuntu telepitesekor hostname-nek FQDN-t kell megadni
+- name: postfix telepítése
+  ansible.builtin.apt: 
+    name: [ "postfix", "mailutils", "libsasl2-modules" ]
+    state: present
+- name: main.cf másolása
+  ansible.builtin.template:
+    src: main.cf.j2
+    dest: /etc/postfix/main.cf 
+  notify:
+    - restart postfix
+- name: relay smtp belépési adatok másolása
+  ansible.builtin.template:
+    src: sasl_passwd.j2
+    dest: /etc/postfix/sasl/sasl_passwd
+    mode: 0600
+  notify:
+    - regenerate /etc/postfix/sasl/sasl_passwd
+- name: belső->külső átirányítások
+  ansible.builtin.lineinfile: 
+  args:
+    state: present
+    create: yes
+    line: "{{ item }} {{ postfix_forwards.to }}"
+    path: /etc/postfix/virtual
+  with_items: "{{ postfix_forwards.from }}"
+  notify:
+    - regenerate /etc/postfix/virtual

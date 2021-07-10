@@ -1,0 +1,35 @@
+- name: apt kulcs hozzáadása
+  ansible.builtin.apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+- name: apt repozitórium hozzáadása
+  ansible.builtin.apt_repository:
+    repo: "deb [arch=armhf] https://download.docker.com/linux/raspbian {{ ansible_facts['distribution_release'] }} stable"
+    update_cache: yes
+    state: present
+  when: ansible_facts['architecture'] == "armv7l"
+- name: apt repozitórium hozzáadása
+  ansible.builtin.apt_repository:
+    repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_facts['distribution_release'] }} stable"
+    update_cache: yes
+    state: present
+  when: ansible_facts['distribution'] == "Ubuntu"
+- name: docker-ce telepítése
+  ansible.builtin.apt:
+    name: docker-ce
+    # dkms-aufs javasolt függőség nem hajlandó települni
+    install_recommends: no
+    state: present
+- name: docker és docker-compose telepítése pip-ben
+  ansible.builtin.pip:
+    name:
+      - docker-compose
+      - docker
+    state: present
+    executable: pip3
+- name: userek hozzáadása docker grouphoz
+  ansible.builtin.user:
+    name: "{{ item }}"
+    groups: ["docker"]
+    append: yes
+  loop: "{{ docker_users }}"

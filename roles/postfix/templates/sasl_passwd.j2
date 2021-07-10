@@ -1,0 +1,4 @@
+{% for key, item in postfix_extra_domains.items() %}
+@{{ item.domain }} {{ item.mailgun_username }}:{{ item.mailgun_password }}
+{% endfor %}
+[smtp.eu.mailgun.org]:587 {{ postfix_default_mailgun_username }}:{{ postfix_default_mailgun_password }}

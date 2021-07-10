@@ -1,0 +1,22 @@
+server {
+    listen 127.0.0.1:81 default_server;
+    listen [::1]:81 default_server;
+
+    server_tokens on;
+
+    server_name localhost;
+
+    location ~ /nginx_status {
+        # Turn on nginx status page
+        stub_status on;
+
+        # Do not log access entries for status page
+        access_log   off;
+
+        allow 127.0.0.1;
+        allow ::1;
+
+        # Deny the rest of the connections
+        deny all;
+    }
+}
